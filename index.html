@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCare - Doctor Appointment Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .chatbot-container {
+            width: 400px;
+            height: 600px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chatbot-header {
+            background-color: #4a6fa5;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .chatbot-header img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+        
+        .chatbot-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .chatbot-header p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .chatbot-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            line-height: 1.4;
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .bot-message {
+            background-color: white;
+            color: #333;
+            border-bottom-left-radius: 5px;
+            align-self: flex-start;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-message {
+            background-color: #4a6fa5;
+            color: white;
+            border-bottom-right-radius: 5px;
+            margin-left: auto;
+        }
+        
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .quick-reply {
+            background-color: #e8f0fe;
+            color: #4a6fa5;
+            padding: 8px 12px;
+            border-radius: 18px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-reply:hover {
+            background-color: #d7e3fc;
+        }
+        
+        .chatbot-input {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #eee;
+        }
+        
+        .chatbot-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .chatbot-input button {
+            background-color: #4a6fa5;
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .chatbot-input button:hover {
+            background-color: #3a5a80;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            padding: 10px 15px;
+            background-color: white;
+            border-radius: 18px;
+            width: fit-content;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #999;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typingAnimation {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .appointment-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .appointment-card h4 {
+            color: #4a6fa5;
+            margin-bottom: 8px;
+        }
+        
+        .appointment-card p {
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .action-button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .confirm {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .cancel {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .reschedule {
+            background-color: #FFC107;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            <img src="https://cdn-icons-png.flaticon.com/512/3309/3309677.png" alt="MediCare Logo">
+            <div>
+                <h2>MediCare Assistant</h2>
+                <p>Online doctor appointment booking</p>
+            </div>
+        </div>
+        
+        <div class="chatbot-messages" id="chatbot-messages">
+            <!-- Messages will appear here -->
+        </div>
+        
+        <div class="chatbot-input">
+            <input type="text" id="user-input" placeholder="Type your message here..." autocomplete="off">
+            <button id="send-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatbotMessages = document.getElementById('chatbot-messages');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            
+            // Initial bot message
+            setTimeout(() => {
+                addBotMessage("Hello! I'm MediCare Assistant. How can I help you today?");
+                setTimeout(() => {
+                    showQuickReplies([
+                        "Book a doctor appointment",
+                        "Find nearby clinics",
+                        "Check my appointments",
+                        "Talk to a human agent"
+                    ]);
+                }, 500);
+            }, 1000);
+            
+            // Send message when button is clicked
+            sendButton.addEventListener('click', sendMessage);
+            
+            // Send message when Enter key is pressed
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            function sendMessage() {
+                const message = userInput.value.trim();
+                if (message !== '') {
+                    addUserMessage(message);
+                    userInput.value = '';
+                    simulateBotResponse(message);
+                }
+            }
+            
+            function addUserMessage(text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message user-message';
+                messageDiv.textContent = text;
+                chatbotMessages.appendChild(messageDiv);
+                scrollToBottom();
+            }
+            
+            function addBotMessage(text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message bot-message';
+                messageDiv.textContent = text;
+                chatbotMessages.appendChild(messageDiv);
+                scrollToBottom();
+            }
+            
+            function showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'typing-indicator';
+                typingDiv.id = 'typing-indicator';
+                typingDiv.innerHTML = `
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                `;
+                chatbotMessages.appendChild(typingDiv);
+                scrollToBottom();
+            }
+            
+            function hideTypingIndicator() {
+                const typingIndicator = document.getElementById('typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+            
+            function showQuickReplies(replies) {
+                const quickRepliesDiv = document.createElement('div');
+                quickRepliesDiv.className = 'quick-replies';
+                
+                replies.forEach(reply => {
+                    const replyButton = document.createElement('div');
+                    replyButton.className = 'quick-reply';
+                    replyButton.textContent = reply;
+                    replyButton.addEventListener('click', function() {
+                        addUserMessage(reply);
+                        simulateBotResponse(reply);
+                    });
+                    quickRepliesDiv.appendChild(replyButton);
+                });
+                
+                chatbotMessages.appendChild(quickRepliesDiv);
+                scrollToBottom();
+            }
+            
+            function showAppointmentCard(appointment) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'appointment-card';
+                cardDiv.innerHTML = `
+                    <h4>Appointment Details</h4>
+                    <p><strong>Doctor:</strong> ${appointment.doctor}</p>
+                    <p><strong>Specialty:</strong> ${appointment.specialty}</p>
+                    <p><strong>Date:</strong> ${appointment.date}</p>
+                    <p><strong>Time:</strong> ${appointment.time}</p>
+                    <p><strong>Location:</strong> ${appointment.location}</p>
+                    <div class="action-buttons">
+                        <button class="action-button confirm">Confirm</button>
+                        <button class="action-button reschedule">Reschedule</button>
+                        <button class="action-button cancel">Cancel</button>
+                    </div>
+                `;
+                
+                chatbotMessages.appendChild(cardDiv);
+                scrollToBottom();
+            }
+            
+            function scrollToBottom() {
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            }
+            
+            function simulateBotResponse(userMessage) {
+                showTypingIndicator();
+                
+                // Simulate delay for bot "thinking"
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    
+                    if (userMessage.toLowerCase().includes('hello') || userMessage.toLowerCase().includes('hi')) {
+                        addBotMessage("Hello there! How can I assist you with your medical needs today?");
+                        showQuickReplies([
+                            "Book a doctor appointment",
+                            "Find nearby clinics",
+                            "Check my appointments"
+                        ]);
+                    } 
+                    else if (userMessage.toLowerCase().includes('book') || userMessage.toLowerCase().includes('appointment')) {
+                        addBotMessage("I can help you book a doctor appointment. What specialty do you need?");
+                        showQuickReplies([
+                            "General Physician",
+                            "Cardiologist",
+                            "Dermatologist",
+                            "Pediatrician",
+                            "Other specialty"
+                        ]);
+                    }
+                    else if (userMessage.toLowerCase().includes('general') || userMessage.toLowerCase().includes('physician')) {
+                        addBotMessage("I'll connect you with a General Physician. When would you like to schedule your appointment?");
+                        showQuickReplies([
+                            "Today if possible",
+                            "This week",
+                            "Next week",
+                            "Specific date"
+                        ]);
+                    }
+                    else if (userMessage.toLowerCase().includes('today')) {
+                        addBotMessage("Here are available slots for today with Dr. Smith, General Physician:");
+                        showAppointmentCard({
+                            doctor: "Dr. Emily Smith",
+                            specialty: "General Physician",
+                            date: new Date().toLocaleDateString(),
+                            time: "3:30 PM",
+                            location: "MediCare Central Clinic, 123 Health St."
+                        });
+                    }
+                    else if (userMessage.toLowerCase().includes('week')) {
+                        addBotMessage("Here are available slots this week with Dr. Johnson, General Physician:");
+                        showAppointmentCard({
+                            doctor: "Dr. Michael Johnson",
+                            specialty: "General Physician",
+                            date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+                            time: "10:00 AM",
+                            location: "MediCare West Clinic, 456 Wellness Ave."
+                        });
+                    }
+                    else if (userMessage.toLowerCase().includes('check') || userMessage.toLowerCase().includes('appointments')) {
+                        addBotMessage("Here are your upcoming appointments:");
+                        showAppointmentCard({
+                            doctor: "Dr. Sarah Wilson",
+                            specialty: "Dermatologist",
+                            date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+                            time: "2:15 PM",
+                            location: "MediCare Skin Clinic, 789 Beauty Blvd."
+                        });
+                    }
+                    else if (userMessage.toLowerCase().includes('find') || userMessage.toLowerCase().includes('clinics')) {
+                        addBotMessage("Here are some clinics near your location:");
+                        addBotMessage("1. MediCare Central Clinic - 123 Health St. (1.2 miles)\n2. City Health Center - 456 Care Rd. (1.8 miles)\n3. Wellness Medical Group - 789 Healing Ave. (2.3 miles)");
+                        showQuickReplies([
+                            "Book at MediCare Central",
+                            "Get directions",
+                            "Show more options"
+                        ]);
+                    }
+                    else {
+                        addBotMessage("I'm sorry, I didn't understand that. Could you please rephrase or select one of these options?");
+                        showQuickReplies([
+                            "Book a doctor appointment",
+                            "Find nearby clinics",
+                            "Check my appointments",
+                            "Talk to a human agent"
+                        ]);
+                    }
+                }, 1500);
+            }
+        });
+    </script>
+</body>
+</html>

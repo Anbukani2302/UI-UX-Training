@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+.sidebar-collapsed {
+  width: 80px;
+}
+
+.sidebar-expanded {
+  width: 250px;
+}
+
+.main-content-collapsed {
+  margin-left: 80px;
+  width: calc(100% - 80px);
+}
+
+.main-content-expanded {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+}
+
+/* Chart container sizing */
+.chart-container {
+  height: 300px;
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
